@@ -4,14 +4,11 @@
 from __future__ import absolute_import
 
 # Import Salt Testing libs
-from salttesting import TestCase, skipIf
-from salttesting.mock import NO_MOCK, NO_MOCK_REASON
-from salttesting.helpers import ensure_in_syspath
-
-ensure_in_syspath('../../')
+from tests.support.unit import TestCase, skipIf
+from tests.support.mock import NO_MOCK, NO_MOCK_REASON
 
 # Import Salt Libs
-from salt.pillar import sqlite3
+import salt.pillar.sqlite3 as sqlite3
 
 
 @skipIf(NO_MOCK, NO_MOCK_REASON)
@@ -522,7 +519,7 @@ class SQLite3PillarTestCase(TestCase):
                                      ['a', 'b', 'c', 'f', 'g', 2],
                                      ['a', 'z', 'h', 'y', 'j', 3],
                                      ['a', 'z', 'h', 'y', 'k', 4]])
-        self.assertEqual(
+        self.assertEqual(sorted(
             {'a': [
                   {'c': [
                       {'e': 1},
@@ -533,8 +530,8 @@ class SQLite3PillarTestCase(TestCase):
                       {'j': 3, 'k': 4}
                       ]
                   }
-            ]},
-             return_data.result
+            ]}),
+             sorted(return_data.result)
         )
 
     def test_302_process_results_with_lists_consecutive(self):
@@ -547,7 +544,7 @@ class SQLite3PillarTestCase(TestCase):
                                      ['a', 'b', 'c', 'f', 'g', 2],
                                      ['a', 'z', 'h', 'y', 'j', 3],
                                      ['a', 'z', 'h', 'y', 'k', 4]])
-        self.assertEqual(
+        self.assertEqual(sorted(
             {'a': [
                   [[
                       {'e': 1},
@@ -558,11 +555,6 @@ class SQLite3PillarTestCase(TestCase):
                       {'j': 3, 'k': 4}
                       ]
                   ]
-            ]},
-             return_data.result
+            ]}),
+             sorted(return_data.result)
         )
-
-
-if __name__ == '__main__':
-    from integration import run_tests
-    run_tests(SQLite3PillarTestCase, needs_daemon=False)
