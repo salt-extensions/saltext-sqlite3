@@ -1,4 +1,4 @@
-import salt.pillar.sqlite3 as sqlite3
+from saltext.sqlite3.pillar import sqlite3
 
 
 def test_001_extract_queries_list():
@@ -313,7 +313,7 @@ def test_004_extract_queries_bogus_list():
             ("SELECT blah3",),
             ("",),
             ("SELECT blah4", 2),
-            tuple(),
+            (),
             ("SELECT blah5",),
             {"query": "SELECT blah6"},
             {"query": ""},
@@ -724,7 +724,7 @@ def test_209_process_results_complexity_collision_mismatch_depth_weird_order():
     assert {1: {2: {3: 5}}} == return_data.result
 
 
-def test_20A_process_results_complexity_as_list_vary():
+def test_20A_process_results_complexity_as_list_vary():  # pylint: disable=invalid-name
     return_data = sqlite3.SQLite3ExtPillar()
     return_data.as_list = True
     return_data.with_lists = []
@@ -765,9 +765,9 @@ def test_301_process_results_with_lists():
             ["a", "z", "h", "y", "k", 4],
         ]
     )
-    assert sorted(
-        {"a": [{"c": [{"e": 1}, {"g": 2}]}, {"h": [{"j": 3, "k": 4}]}]}
-    ) == sorted(return_data.result)
+    assert sorted({"a": [{"c": [{"e": 1}, {"g": 2}]}, {"h": [{"j": 3, "k": 4}]}]}) == sorted(
+        return_data.result
+    )
 
 
 def test_302_process_results_with_lists_consecutive():

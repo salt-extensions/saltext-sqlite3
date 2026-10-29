@@ -1,0 +1,64 @@
+---
+name: Get Changed Files
+
+on:
+  workflow_call:
+    inputs:
+      checkout-ref:
+        required: false
+        type: string
+        default: ''
+    outputs:
+      changed-files:
+        description: "Changed file JSON output from dorny/paths-filter"
+        value: ${{ jobs.get-changed-files.outputs.changed-files }}
+
+permissions:
+  contents: read  # for dorny/paths-filter to fetch a list of changed files
+  pull-requests: read  # for dorny/paths-filter to read pull requests
+
+jobs:
+  get-changed-files:
+    name: Get Changed Files
+    runs-on: ubuntu-26.04
+    outputs:
+      changed-files: ${{ toJSON(steps.changed-files.outputs) }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ inputs.checkout-ref || github.sha }}
+          persist-credentials: true  # dorny/paths-filter needs it because the checkout is shallow
+
+      - name: Get Changed Files
+        id: changed-files
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d  # v4.0.3
+        with:
+          token: ${{ github.token }}
+          list-files: json
+          filters: |-
+            repo:
+              - added|modified:
+                - '**'
+            deleted:
+              - deleted:
+                - '**'
+            pre-commit:
+              - added|modified|deleted:
+                - .pre-commit-hooks/**
+                - .pre-commit-config.y?(a)ml
+                - pyproject.toml
+                - noxfile.py
+            # If files in this filter change, a test release to TestPyPI
+            # should be attempted. This is currently not implemented yet.
+            release:
+              - added|modified|deleted:
+                - .copier-answers.y?(a)ml
+                - .github/workflows/**
+                - CHANGELOG.md
+                - pyproject.toml
+
+      - name: Echo Changed Files Output
+        run: echo "$CHANGED_FILES"
+        env:
+          CHANGED_FILES: ${{ toJSON(steps.changed-files.outputs) }}
